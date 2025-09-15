@@ -1,0 +1,22 @@
+:root {
+  --main-bg-color: #00072D;
+  --post-bg-color: #001C55;
+  --text-color: #0E6BA8;
+  --secondary-color: #A6E1FA;
+}
+
+body {
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  background-color: var(--main-bg-color);
+}
+
+.post {
+    background-color: var(--post-bg-color);
+    padding: 20px;
+    margin-bottom: 10px;
+    
+  .widget, button {
+      background-color: var(--secondary-color);
+      margin: 10px;
+  }
+}

@@ -1,0 +1,49 @@
+#+TITLE: Progettazione database per Y
+
+* Idea
+
+App social media basata su messaggi vocali. Un post viene creato da un'utente, ed è composto da un messaggio vocale, un titolo, la data di creazione, i suoi tag e il numero di like. Gli utenti possono commentare un post con un'altro messaggio vocale e mettere like. Gli utenti possono anche creare un nuovo post riferenziando un post di qualsiasi altro utente.
+Un utente può modificare o cancellare il proprio post.
+Audio possono avere trascrizioni.
+
+Ogni utente ha il proprio account, nel quale si registrano il nickname, l'immagine avatar e la data di unione al social. Nella pagina dell'account si possono anche vedere tutti i post fatti da un utente.
+
+Utenti possono creare gruppi di utenti, che possono essere "aperti" o "su invito", nei quali post saranno visibili solo ai partecipanti del gruppo. Più simile a una chat privata.
+
+Utenti possono creare pagine, che possono essere "aperti" o "su invito", nei quali post saranno visibili nel feed principale degli iscritti.
+
+(Opzionale) Gruppi e feed possono avere limitazioni sui post, quali la lunghezza dell'audio, il volume, il numero di partecipanti.
+
+Il feed principale di ogni utente mostra i post delle pagine a cui è iscritto ed i post con i tag che segue.
+
+Un moderatore di un gruppo o una pagina può cancellare i post degli utenti dello stesso gruppo o pagina, accettare e bannare gli utenti.
+
+Un admin del sito può fare le stesse cose del moderatore, ma in ogni gruppo o pagina.
+
+* Frasi principali
+
+1. Post viene creato da utente.
+2. Post composto da messaggio vocale, titolo, data creazione, tag, numero di like.
+3. Post può avere tanti commenti e tag.
+4. Un post può fare riferimento a un altro post.
+5. Post possono avere trascrizioni.
+6. Post può essere editato da OP, moderatore o admin.
+7. Utente ha un proprio account, con nickname, immagine, data di unione.
+8. Utente può vedere i propri post.
+9. Utente può creare gruppi e pagine "aperti" o "su invito". Possono avere limitazioni, vincoli e regole.
+10. Ogni utente ha un proprio feed principale, composto dagli ultimi post dai tag seguiti e dalle pagine a cui è iscritto.
+11. Moderatore può editare, eliminare i post degli utenti della pagina o gruppo a cui appartiene, e bannare gli utenti.
+12. Amministratore del sito può fare azioni da moderatore su tutto il sito, può aggiungere e rimuovere ruolo di moderatore.
+
+* Vocabolario
+
+| name    | description                                                       |
+|---------+-------------------------------------------------------------------|
+| Post    | Contenuto creato da utente, composto da un audio                  |
+| User    | Utente del sito                                                   |
+| Account | Dati personali di utente, moderatore o admin                      |
+| Comment | Post in risposta ad un'altro post                                 |
+| Tag     | Stringa associata a un post                                       |
+| Page    | Gruppo di utenti privato                                          |
+| Group   | Gruppo di utenti visibile da tutti                                |
+| Feed    | Gruppo di post per ogni user, composto da post delle pagine e tag |
