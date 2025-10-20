@@ -1,4 +1,4 @@
-package alececco.com.y;
+package com.alececco.y;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

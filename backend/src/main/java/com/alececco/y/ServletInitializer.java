@@ -1,4 +1,4 @@
-package alececco.com.y;
+package com.alececco.y;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

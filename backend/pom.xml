@@ -8,7 +8,7 @@
 		<version>3.5.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>alececco.com</groupId>
+	<groupId>com.alececco</groupId>
 	<artifactId>y</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
