@@ -1,7 +1,7 @@
 package com.alececco.y.service;
 
 import com.alececco.y.dto.CreateUserDTO;
-import com.alececco.y.models.User;
+import com.alececco.y.models.Users;
 import com.alececco.y.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,8 +14,8 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public User register(CreateUserDTO createUserDTO) {
-        User u = User.builder()
+    public Users register(CreateUserDTO createUserDTO) {
+        Users u = Users.builder()
                 .username(createUserDTO.getUsername())
                 .password(passwordEncoder.encode(createUserDTO.getRawPassword()))
                 .build();

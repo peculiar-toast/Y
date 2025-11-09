@@ -1,5 +1,6 @@
-CREATE TABLE Account (
-       id UUID,
+CREATE TABLE Users (
+       id SERIAL PRIMARY KEY,
        username VARCHAR(255),
-       date_joined DATE
+       password VARCHAR(255),
+       role VARCHAR(255)
 );
