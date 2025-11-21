@@ -13,7 +13,4 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     private final UserService userService;
 
-    void register(@RequestBody CreateUserDTO createUserDTO) {
-        userService.register(createUserDTO);
-    }
 }

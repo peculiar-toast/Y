@@ -16,6 +16,12 @@ public class PasswordController {
         return passwordEncoder.encode(raw);
     }
 
+    @RequestMapping("/public/hello")
+    public String helloEveryone() {
+        System.out.println("CIOAOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOo");
+        return "Hello everyone!";
+    }
+
     @RequestMapping("/secure/hello")
     public String secureHello() {
         return "Hello authenticated user!";

@@ -17,3 +17,6 @@ spring:
   sql:
     init:
       mode: ALWAYS
+jwt:
+  secret-key: secret-key
+  expiration: 3600000
