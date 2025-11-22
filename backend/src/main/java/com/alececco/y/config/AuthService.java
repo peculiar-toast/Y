@@ -20,9 +20,7 @@ public class AuthService {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.username(),
-                            request.password()
-                    )
-            );
+                            request.password()));
 
             User user = (User) authentication.getPrincipal();
 
