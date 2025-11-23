@@ -9,6 +9,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
+import com.alececco.y.models.Users;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -22,13 +24,14 @@ public class AuthService {
                             request.username(),
                             request.password()));
 
-            User user = (User) authentication.getPrincipal();
+            Users user = (Users) authentication.getPrincipal();
 
             String token = jwtService.generateToken(user);
 
             return new AuthenticationResponse(token);
         } catch (AuthenticationException ae) {
-            throw new RuntimeException("Invalid credentials");
+            System.out.println("Invalid credentials: " + ae.getMessage());
+            return new AuthenticationResponse("Invalid username or password");
         }
     }
 }

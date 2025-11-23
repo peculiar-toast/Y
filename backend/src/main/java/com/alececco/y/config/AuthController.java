@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthService authService;
     private final UserService userService;
 
@@ -26,4 +27,5 @@ public class AuthController {
     void register(@RequestBody CreateUserDTO createUserDTO) {
         userService.register(createUserDTO);
     }
+
 }

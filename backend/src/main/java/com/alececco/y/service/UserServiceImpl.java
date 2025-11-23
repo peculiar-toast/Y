@@ -18,9 +18,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Users register(CreateUserDTO createUserDTO) {
+
+        if (createUserDTO == null) {
+            throw new IllegalArgumentException("CreateUserDTO cannot be null");
+        }
+
         Users u = Users.builder()
                 .username(createUserDTO.getUsername())
                 .password(passwordEncoder.encode(createUserDTO.getRawPassword()))
+                .role(createUserDTO.getRole())
                 .build();
 
         return userRepository.save(u);
