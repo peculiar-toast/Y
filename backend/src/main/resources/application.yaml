@@ -17,6 +17,18 @@ spring:
   sql:
     init:
       mode: ALWAYS
+  logging:
+    level:
+      root: INFO
+      org:
+        springframework: INFO
+        hibernate:
+          validator: ERROR
+      io:
+        jsonwebtoken: WARN
+  ouput:
+    ansi:
+      enabled: ALWAYS
 jwt:
-  secret-key: secret-key
+  secret-key: ${JWT_SECRET_KEY}
   expiration: 3600000
