@@ -12,8 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/public/audio")
 @RequiredArgsConstructor
 public class AudioController {
-    
-    @PostMapping("/upload", consumes="multipart/form-data")
+
+    @PostMapping(path="/upload", consumes="multipart/form-data")
     public String uploadAudio(@RequestParam("file") MultipartFile file) {
         // Logica per gestire il caricamento del file audio
         return "File audio caricato con successo: " + file.getOriginalFilename();
