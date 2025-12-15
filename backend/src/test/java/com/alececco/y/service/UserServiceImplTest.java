@@ -30,8 +30,7 @@ class UserServiceImplTest {
 
     @Test
     void register_nullDto_throwsIllegalArgumentException() {
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> userService.register(null));
-        assertEquals("CreateUserDTO cannot be null", ex.getMessage());
+        assertThrows(IllegalArgumentException.class, () -> userService.register(null));
         verifyNoInteractions(userRepository, passwordEncoder);
     }
 

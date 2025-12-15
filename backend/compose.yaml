@@ -11,6 +11,7 @@ services:
     volumes:
       - ./db:/docker-entrypoint-initdb.d:ro
       - postgres-data:/var/lib/postgresql/data
+      - stored-files:${FILE_PATH}
     ports:
       - "${POSTGRES_PORT}:5432"
   app:
@@ -29,3 +30,4 @@ services:
       - "${BACKEND_PORT}:8080"
 volumes:
   postgres-data:
+  stored-files:

@@ -1,6 +1,9 @@
 package com.alececco.y.service;
 
+import com.alececco.y.models.AudioFile;
+
 public interface AudioStorageService {
-    Path store(MultipartFile file);
-    Post findByName(String name);
+    String store(AudioFile audioFile);
+    AudioFile load(String name);
+    void remove(String name);
 }
