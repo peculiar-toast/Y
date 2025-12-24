@@ -11,7 +11,7 @@ CREATE TABLE Posts (
        user_id INTEGER REFERENCES Users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE AudioData (
+CREATE TABLE AudioMetadata (
        id SERIAL PRIMARY KEY,
        filename VARCHAR(255),
        storage_path VARCHAR(255),

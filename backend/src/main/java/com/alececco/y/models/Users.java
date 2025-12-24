@@ -35,7 +35,7 @@ public class Users implements UserDetails {
     private UserRole role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Posts> posts;
+    private Set<Post> posts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Posts {
+public class Post {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,6 +32,9 @@ public class Posts {
 
     private String title;
     
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<AudioData> audioData;
+    @OneToMany(
+        mappedBy = "post",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true)
+    private List<AudioMetadata> audioMetadata;
 }

@@ -4,123 +4,106 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.alececco.y.dto.audio.AudioDTO;
+import com.alececco.y.components.PostMapper;
 import com.alececco.y.dto.post.CreatePostDTO;
 import com.alececco.y.dto.post.PostDTO;
 import com.alececco.y.dto.post.UpdatePostDTO;
-import com.alececco.y.models.AudioData;
-import com.alececco.y.models.Posts;
+import com.alececco.y.models.AudioMetadata;
+import com.alececco.y.models.Post;
 import com.alececco.y.models.Users;
-import com.alececco.y.repository.AudioDataRepository;
 import com.alececco.y.repository.PostRepository;
 import com.alececco.y.repository.UserRepository;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
-    private final ModelMapper modelMapper;
     private final PostRepository postRepository;
-    private final AudioDataRepository audioDataRepository;
     private final UserRepository usersRepository;
-
-    private PostDTO mapToDTO(Posts post) {
-        PostDTO postDTO = modelMapper.map(post, PostDTO.class);
-
-        List<AudioDTO> audio = audioDataRepository.findByPostId(post.getId()).stream()
-                .map(a -> AudioDTO.builder()
-                        .id(a.getId())
-                        .url(a.getFilename())
-                        .build())
-                .toList();
-        postDTO.setAudio(audio);
-
-        Users user = post.getUser();
-        postDTO.setUserId(user.getId());
-        postDTO.setUsername(user.getUsername());
-
-        return postDTO;
-    }
+    private final PostMapper postMapper;
 
     @Override
     public Optional<PostDTO> getPostById(Long id) {
-        Optional<Posts> post = postRepository.findById(id);
-
-        if (post.isEmpty()) {
-            return Optional.empty();
-        }
-
-        PostDTO postDTO = mapToDTO(null);
-        return Optional.of(postDTO);
+        return postRepository.findById(id)
+                .map(postMapper::toDto);
     }
 
     // TODO temporary: remove as soon as no longer convenient
     @Override
     public List<PostDTO> getAllPosts() {
         List<PostDTO> posts = postRepository.findAll().stream()
-                .map(this::mapToDTO)
+                .map(postMapper::toDto)
                 .toList();
 
         return posts;
     }
 
+    @Transactional
     @Override
     public void createPost(CreatePostDTO postDTO) {
-        Posts post = new Posts();
+        Post post = new Post();
         post.setTitle(postDTO.title());
 
         Users user = usersRepository.findById(postDTO.userId()).orElseThrow(
-            () -> new IllegalArgumentException("User not found with id: " + postDTO.userId()));
+                () -> new EntityNotFoundException("User with ID " + postDTO.userId().toString() + " not found"));
         post.setUser(user);
 
-        List<AudioData> audioDataList = postDTO.files().stream()
-                .map(audio -> {
-                    AudioData audioData = AudioData.builder()
-                        .filename(audio.getName())
-                        .post(post)
-                        .build();
+        List<AudioMetadata> audioDataList = postDTO.files().stream()
+                .map(audioDTO -> {
+                    AudioMetadata audioData = AudioMetadata.builder()
+                            .filename(audioDTO.getName())
+                            .post(post)
+                            .build();
                     return audioData;
                 })
                 .collect(Collectors.toList());
-        post.setAudioData(audioDataList);
+        post.setAudioMetadata(audioDataList);
 
-        audioDataRepository.storeAll(audioDataList);
         postRepository.save(post);
     }
 
+    @Transactional
     @Override
-    public void updatePost(UpdatePostDTO updatePostDTO) {
-        Posts post = postRepository.findById(updatePostDTO.getId()).orElseThrow(
-            () -> new IllegalArgumentException("Post not found with id: " + updatePostDTO.getId())
-        );
+    public void updatePost(Long id, UpdatePostDTO updatePostDTO) {
+        Post post = postRepository.findById(id).orElseThrow(
+                () -> new EntityNotFoundException("Post not found with id: " + id));
 
-        if (updatePostDTO.getNewAudios().isEmpty() == false) {
-            List<AudioData> newAudioDataList = updatePostDTO.getNewAudios().stream()
-                .map(audioDTO -> {
-                    AudioData audioData = AudioData.builder()
-                        .filename(audioDTO.file().getName())
-                        .post(post)
-                        .build();
-                    return audioData;
-                })
-                .collect(Collectors.toList());
-            audioDataRepository.storeAll(newAudioDataList);
+        if (updatePostDTO.title() != null) {
+            if (updatePostDTO.title().isBlank()) {
+                throw new IllegalArgumentException("Title cannot be blank");
+            }
+            post.setTitle(updatePostDTO.title());
         }
 
-        audioDataRepository.deleteByIds(
-            updatePostDTO.getRemoveAudioIds()
-        );
+        if (updatePostDTO.newAudios().isEmpty() == false) {
+            List<AudioMetadata> newAudioDataList = updatePostDTO.newAudios().stream()
+                    .map(audioDTO -> {
+                        AudioMetadata audioData = AudioMetadata.builder()
+                                .filename(audioDTO.getName())
+                                .post(post)
+                                .build();
+                        return audioData;
+                    })
+                    .collect(Collectors.toList());
+            post.getAudioMetadata().addAll(newAudioDataList);
+        }
 
-        post.setTitle(updatePostDTO.getTitle());
+        if (updatePostDTO.removeAudioIds().isEmpty() == false) {
+            post.getAudioMetadata()
+                    .removeIf(audioData -> updatePostDTO.removeAudioIds().contains(audioData.getId()));
+        }
 
         postRepository.save(post);
     }
 
+    @Transactional
     @Override
     public void deletePost(Long id) {
         postRepository.deleteById(id);

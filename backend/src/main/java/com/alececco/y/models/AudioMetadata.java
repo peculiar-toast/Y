@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 @Entity
 @Builder
-public class AudioData {
+public class AudioMetadata {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,5 +22,5 @@ public class AudioData {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    private Posts post;
+    private Post post;
 }

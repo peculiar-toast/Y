@@ -3,15 +3,15 @@ package com.alececco.y.repository;
 import java.util.List;
 import java.util.Optional;
 
-import com.alececco.y.models.Posts;
+import com.alececco.y.models.Post;
 
-public interface PostRepository {
+public interface PostRepository extends JpaRepository<Post, Long> {
     
-    Optional<Posts> findById(Long id);
+    Optional<Post> findById(Long id);
 
-    List<Posts> findAll();
+    List<Post> findAll();
 
-    void save(Posts post);
+    void save(Post post);
 
     void deleteById(Long id);
 }
