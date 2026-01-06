@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class PostMapper {
-    
+
     private final ModelMapper modelMapper;
 
     public PostDTO toDto(Post post) {

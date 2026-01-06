@@ -16,7 +16,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -44,16 +43,15 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<String> createPost(
-        @ModelAttribute @Valid CreatePostDTO dto) {
+            @ModelAttribute @Valid CreatePostDTO dto) {
         postService.createPost(dto);
         return ResponseEntity.ok("Post created succesfully");
     }
 
-    @PutMapping(value="/{id}", consumes = "multipart/form-data")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<String> updatePost(
             @PathVariable Long id,
-            @ModelAttribute @Valid UpdatePostDTO dto
-        ) {
+            @ModelAttribute @Valid UpdatePostDTO dto) {
         postService.updatePost(id, dto);
         return ResponseEntity.ok("Post updated succesfully");
     }

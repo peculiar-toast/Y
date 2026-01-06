@@ -13,12 +13,15 @@ import lombok.Data;
 @Entity
 @Builder
 public class AudioMetadata {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String filename;
+    private String storageKey;
+    private String contentType;
+    private long size;
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)

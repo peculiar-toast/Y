@@ -17,11 +17,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Post {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,10 +31,7 @@ public class Post {
     private Users user;
 
     private String title;
-    
-    @OneToMany(
-        mappedBy = "post",
-        cascade = CascadeType.ALL,
-        orphanRemoval = true)
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AudioMetadata> audioMetadata;
 }

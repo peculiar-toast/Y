@@ -1,10 +1,14 @@
 package com.alececco.y.repository;
 
+import java.io.InputStream;
+
+import org.springframework.core.io.Resource;
+
 public interface AudioStorage {
-    
-    void store(String filename, byte[] data);
 
-    byte[] load(String filename);
+    void store(String key, InputStream data);
 
-    void delete(String filename);
+    Resource load(String key);
+
+    void delete(String key);
 }

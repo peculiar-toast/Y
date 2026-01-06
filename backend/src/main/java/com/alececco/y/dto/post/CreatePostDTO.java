@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-public record CreatePostDTO (
-    String title,
-    List<MultipartFile> files,
-    Long userId
-) {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+public record CreatePostDTO(
+        @NotNull @NotBlank String title,
+        @NotNull List<@NotNull MultipartFile> files,
+        @NotNull Long userId) {
 }

@@ -1,16 +1,12 @@
 package com.alececco.y.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,22 +17,23 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alececco.y.exception.EmptyFileException;
 import com.alececco.y.exception.WrongFileTypeException;
 import com.alececco.y.models.AudioMetadata;
 import com.alececco.y.models.Post;
-import com.alececco.y.repository.AudioMetadataRepository;
 import com.alececco.y.repository.AudioStorage;
+import com.alececco.y.testfactory.AudioMetadataTestFactory;
+import com.alececco.y.testfactory.MultipartFileTestFactory;
+import com.alececco.y.testfactory.PostTestFactory;
 
 @ExtendWith(MockitoExtension.class)
 public class AudioServiceTest {
 
     @Mock
     AudioStorage storage;
-
-    @Mock
-    AudioMetadataRepository metadataRepository;
 
     @InjectMocks
     AudioService audioService;
@@ -48,116 +45,102 @@ public class AudioServiceTest {
 
     @BeforeEach
     void setUp() {
-        post = Post.builder()
-                .id(1L)
-                .title("Test Post")
-                .build();
-        post.setAudioMetadata(new ArrayList<>());
+        post = PostTestFactory.validPost();
     }
 
     @Test
-    void uploadAudio_validAudio_storesSuccessfully() {
-        String filename = "test-audio.mp3";
-        byte[] content = "dummy audio content".getBytes();
+    void addAudios_validAudio_storesSuccessfully() {
+        List<MultipartFile> audios = MultipartFileTestFactory.multiple(2);
+        audioService.addAudios(post, audios);
 
-        audioService.uploadAudio(post, filename, content);
+        verify(storage, times(2)).store(anyString(), any(InputStream.class));
 
-        verify(storage).store(filename, content);
-        verify(metadataRepository).save(metadataCaptor.capture());
+        assertEquals(2, post.getAudioMetadata().size());
 
-        AudioMetadata savedMetadata = metadataCaptor.getValue();
-        assertNotNull(savedMetadata);
-        assertEquals(filename, savedMetadata.getFilename());
-        assertEquals(post, savedMetadata.getPost());
-
-        assertEquals(1, post.getAudioMetadata().size());
-        assertEquals(filename, post.getAudioMetadata().get(0).getFilename());
+        List<AudioMetadata> saved = metadataCaptor.getAllValues();
+        assertEquals(audios.getLast().getOriginalFilename(), saved.getLast().getFilename());
+        assertSame(post, saved.getLast().getPost());
     }
 
     @Test
-    void uploadAudio_nullFilename_throwsException() {
-        String filename = null;
-        byte[] content = "some content".getBytes();
+    void addAudios_nullFilename_throwsException() {
+        MultipartFile audio = MultipartFileTestFactory.custom(
+                "file",
+                null,
+                "audio/mpeg",
+                "content".getBytes());
 
-        doThrow(new IllegalArgumentException("Filename cannot be empty!")).when(storage).store(eq(filename), any());
+        assertThrows(IllegalArgumentException.class,
+                () -> audioService.addAudios(post, List.of(audio)));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            audioService.uploadAudio(post, filename, content);
-        });
-
-        verifyNoInteractions(metadataRepository);
+        verifyNoInteractions(storage);
+        assertTrue(post.getAudioMetadata().isEmpty());
     }
 
     @Test
-    void uploadAudio_emptyFile_throwsException() {
-        String filename = "empty-audio.mp3";
-        byte[] content = new byte[0];
+    void addAudios_emptyFile_throwsException() {
+        MultipartFile file = new MockMultipartFile("file1", "file.exe", "audio/mpeg", "".getBytes());
 
-        doThrow(new EmptyFileException("File cannot be empty")).when(storage).store(eq(filename), eq(content));
+        assertThrows(EmptyFileException.class,
+                () -> audioService.addAudios(post, List.of(file)));
 
-        assertThrows(EmptyFileException.class, () -> {
-            audioService.uploadAudio(post, filename, content);
-        });
-
-        verifyNoInteractions(metadataRepository);
+        verifyNoInteractions(storage);
+        assertTrue(post.getAudioMetadata().isEmpty());
     }
 
     @Test
-    void uploadAudio_wrongFileType_throwsException() {
-        String filename = "wrong-audio.txt";
-        byte[] content = "some content".getBytes();
+    void addAudios_wrongFileType_throwsException() {
+        MultipartFile file = new MockMultipartFile("file1", "file.exe", "wrong/type", "content1".getBytes());
 
-        doThrow(new WrongFileTypeException("Wrong filetype")).when(storage).store(eq(filename), eq(content));
+        assertThrows(WrongFileTypeException.class,
+                () -> audioService.addAudios(post, List.of(file)));
 
-        assertThrows(WrongFileTypeException.class, () -> {
-            audioService.uploadAudio(post, filename, content);
-        });
-
-        verifyNoInteractions(metadataRepository);
+        verifyNoInteractions(storage);
+        assertTrue(post.getAudioMetadata().isEmpty());
     }
 
     @Test
-    void getAudiosForPost_existingPost_returnsMetadataList() {
-        AudioMetadata metadata1 = AudioMetadata.builder().filename("audio1.mp3").post(post).build();
-        AudioMetadata metadata2 = AudioMetadata.builder().filename("audio2.mp3").post(post).build();
-
-        when(metadataRepository.findByPost(post)).thenReturn(List.of(metadata1, metadata2));
-
-        var result = audioService.getAudiosForPost(post);
-
-        assertNotNull(result);
-        assertEquals(2, result.size());
-    }
-
-    @Test
-    void deleteAudio_existingMetadata_deletesSuccessfully() {
-        AudioMetadata metadata = AudioMetadata.builder()
-                .filename("to-delete-audio.mp3")
-                .post(post)
-                .build();
+    void delete_existingAudio_removesFromPostAndDeleteFile() {
+        AudioMetadata metadata = AudioMetadataTestFactory.valid(post);
         post.getAudioMetadata().add(metadata);
 
-        audioService.deleteAudio(metadata);
+        audioService.delete(post, metadata);
 
-        verify(storage).delete(metadata.getFilename());
-        verify(metadataRepository).delete(metadata);
-        assertEquals(0, post.getAudioMetadata().size());
+        verify(storage).delete(metadata.getStorageKey());
+        assertTrue(post.getAudioMetadata().isEmpty());
     }
 
     @Test
-    void deleteAudio_nonExistingMetadata_throwsException() {
-        AudioMetadata metadata = AudioMetadata.builder()
-                .filename("non-existing-audio.mp3")
-                .post(post)
-                .build();
+    void delete_audioNotBelongingToPost_throwsException() {
+        AudioMetadata metadata = AudioMetadataTestFactory.valid(PostTestFactory.validPost());
 
-        doThrow(new RuntimeException("File not found")).when(storage).delete(metadata.getFilename());
+        assertThrows(IllegalArgumentException.class,
+                () -> audioService.delete(post, metadata));
 
-        assertThrows(RuntimeException.class, () -> {
-            audioService.deleteAudio(metadata);
-        });
+        verifyNoInteractions(storage);
+    }
 
-        verify(storage).delete(metadata.getFilename());
-        verifyNoInteractions(metadataRepository);
+    @Test
+    void deleteAllForPost_removesAllAudios() {
+        Post postWithAudios = PostTestFactory.withAudios(3);
+
+        audioService.deleteAllForPost(postWithAudios);
+
+        postWithAudios.getAudioMetadata().forEach(
+                a -> verify(storage).delete(a.getStorageKey()));
+
+        assertTrue(postWithAudios.getAudioMetadata().isEmpty());
+    }
+
+    @Test
+    void addAudios_storageFails_doesNotMutatePost() throws Exception {
+        MultipartFile audio = MultipartFileTestFactory.single("file");
+
+        doThrow(new IOException()).when(storage).store(anyString(), any(InputStream.class));
+
+        assertThrows(UncheckedIOException.class,
+                () -> audioService.addAudios(post, List.of(audio)));
+
+        assertTrue(post.getAudioMetadata().isEmpty());
     }
 }

@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alececco.y.components.PostMapper;
@@ -28,6 +29,9 @@ import com.alececco.y.models.UserRole;
 import com.alececco.y.models.Users;
 import com.alececco.y.repository.PostRepository;
 import com.alececco.y.repository.UserRepository;
+import com.alececco.y.testfactory.MultipartFileTestFactory;
+import com.alececco.y.testfactory.PostTestFactory;
+import com.alececco.y.testfactory.UserTestFactory;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -43,6 +47,9 @@ public class PostServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private AudioService audioService;
+
     @InjectMocks
     private PostServiceImpl postService;
 
@@ -50,150 +57,175 @@ public class PostServiceImplTest {
     private Post testPost;
 
     @BeforeEach
-    private void setUp() {
-        testUser = Users.builder()
-                .id(1L)
-                .username("Test user")
-                .role(UserRole.USER)
-                .build();
-
-        testPost = Post.builder()
-                .id(1L)
-                .title("Test post title")
-                .audioMetadata(new ArrayList<>(List.of(
-                        Instancio.create(AudioMetadata.class),
-                        Instancio.create(AudioMetadata.class))))
-                .user(testUser)
-                .build();
+    void setUp() {
+        testUser = UserTestFactory.validUser();
+        testPost = PostTestFactory.withAudios(2);
     }
 
     @Test
     void getPostById_postExists_returnsPostDTO() {
-        Post post = Post.builder()
-                .id(1L)
-                .title("Test Post")
-                .build();
-
+        Post post = PostTestFactory.validPost();
         PostDTO postDTO = new PostDTO();
-        postDTO.setId(1L);
-        postDTO.setTitle("Test Post");
+        postDTO.setId(post.getId());
+        postDTO.setTitle(post.getTitle());
 
         when(postRepository.findById(1L)).thenReturn(Optional.of(post));
         when(postMapper.toDto(post)).thenReturn(postDTO);
 
         Optional<PostDTO> result = postService.getPostById(1L);
 
-        verify(postMapper).toDto(post);
-
         assertTrue(result.isPresent());
-        assertEquals(1L, result.get().getId());
-        assertEquals("Test Post", result.get().getTitle());
+        assertEquals(postDTO, result.get());
+
+        verify(postRepository).findById(1L);
+        verify(postMapper).toDto(post);
     }
 
     @Test
     void getPostById_postDoesNotExist_returnsEmptyOptional() {
-        when(postRepository.findById(1L)).thenReturn(Optional.empty());
+        when(postRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Optional<PostDTO> result = postService.getPostById(1L);
+        Optional<PostDTO> result = postService.getPostById(99L);
 
         assertTrue(result.isEmpty());
+
+        verify(postRepository).findById(99L);
+        verifyNoInteractions(postMapper);
     }
 
     @Test
-    void createPost_validData_savesPost() {
-        Users user = Users.builder()
-                .id(1L)
-                .username("testuser")
-                .build();
-        List<MultipartFile> files = List.of(
-                mock(MultipartFile.class),
-                mock(MultipartFile.class));
+    void createPost_validData_createsPostAndDelegatesAudio() {
+        List<MultipartFile> files = MultipartFileTestFactory.multiple(2);
+        CreatePostDTO createDto = new CreatePostDTO("testTitle", files, 1L);
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
 
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        postService.createPost(createDto);
 
-        CreatePostDTO createPostDTO = new CreatePostDTO("New Post", files, 1L);
-        postService.createPost(createPostDTO);
-
+        verify(userRepository).findById(1L);
+        verify(audioService).addAudios(any(Post.class), eq(files));
         verify(postRepository).save(postCaptor.capture());
 
         Post savedPost = postCaptor.getValue();
-        assertEquals("New Post", savedPost.getTitle());
-        assertEquals(user, savedPost.getUser());
-        assertEquals(2, savedPost.getAudioMetadata().size());
-        assertEquals(files.getLast().getName(),
-                savedPost.getAudioMetadata().getLast().getFilename());
+
+        assertEquals("testTitle", savedPost.getTitle());
+        assertEquals(testUser, savedPost.getUser());
     }
 
     @Test
     void createPost_userDoesNotExist_throwsException() {
-        List<MultipartFile> files = List.of(mock(MultipartFile.class));
+        CreatePostDTO createPostDTO = new CreatePostDTO("New Post", List.of(), 1L);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
-        CreatePostDTO createPostDTO = new CreatePostDTO("New Post", files, 1L);
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
             postService.createPost(createPostDTO);
         });
 
-        verifyNoInteractions(postRepository);
+        verify(userRepository).findById(1L);
+        verifyNoInteractions(postRepository, audioService);
     }
 
     @Test
-    void updatePost_postExists_updatesTitle() {
-        UpdatePostDTO updatePostDTO = new UpdatePostDTO("Updated title", List.of(), List.of());
-
-        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+    void updatePost_postExists_updatesTitleOnly() {
+        UpdatePostDTO updatePostDTO = new UpdatePostDTO("Updated title", null, null);
 
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(testPost));
 
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+
         postService.updatePost(testPost.getId(), updatePostDTO);
 
+        verify(postRepository).findById(testPost.getId());
         verify(postRepository).save(postCaptor.capture());
+        verifyNoInteractions(audioService);
 
         Post capturedPost = postCaptor.getValue();
 
         assertEquals(updatePostDTO.title(), capturedPost.getTitle());
-        assertEquals(testPost.getAudioMetadata(), capturedPost.getAudioMetadata());
+        assertSame(testPost.getAudioMetadata(), capturedPost.getAudioMetadata());
     }
 
     @Test
-    void updatePost_postExists_addsAudios() {
-        List<MultipartFile> newAudios = List.of(
-                mock(MultipartFile.class),
-                mock(MultipartFile.class));
-        UpdatePostDTO updatePostDTO = new UpdatePostDTO(null, newAudios, List.of());
+    void updatePost_postExists_addsAudiosOnly() {
+        List<MultipartFile> newAudios = MultipartFileTestFactory.multiple(2);
+        UpdatePostDTO updatePostDTO = new UpdatePostDTO(null, newAudios, null);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
 
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
 
-        when(postRepository.findById(anyLong())).thenReturn(Optional.of(testPost));
+        postService.updatePost(1L, updatePostDTO);
 
-        postService.updatePost(testPost.getId(), updatePostDTO);
-
-        verify(postRepository).findById(anyLong());
+        verify(postRepository).findById(1L);
+        verify(audioService).addAudios(any(Post.class), eq(newAudios));
         verify(postRepository).save(postCaptor.capture());
 
         Post capturedPost = postCaptor.getValue();
 
-        assertEquals(4, capturedPost.getAudioMetadata().size());
         assertEquals(testPost.getTitle(), capturedPost.getTitle());
-        assertEquals(
-                newAudios.getLast().getName(),
-                capturedPost.getAudioMetadata().getLast().getFilename());
+    }
+
+    @Test
+    void updatePost_postExists_updatesTitleAndAddsAudios() {
+        List<MultipartFile> files = MultipartFileTestFactory.multiple(2);
+
+        UpdatePostDTO dto = new UpdatePostDTO("updatedTitle", files, null);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
+
+        ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
+
+        postService.updatePost(1L, dto);
+
+        verify(postRepository).findById(1L);
+        verify(audioService).addAudios(any(Post.class), eq(files));
+        verify(postRepository).save(postCaptor.capture());
+
+        Post savedPost = postCaptor.getValue();
+
+        assertEquals("updatedTitle", savedPost.getTitle());
     }
 
     @Test
     void updatePost_postDoesNotExist_throwsException() {
-        UpdatePostDTO updatePostDTO = new UpdatePostDTO("Updated title", List.of(), List.of());
+        UpdatePostDTO updatePostDTO = new UpdatePostDTO("Updated title", null, null);
 
         when(postRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class, () -> {
-            postService.updatePost(1L, updatePostDTO);
-        });
+        assertThrows(EntityNotFoundException.class,
+                () -> postService.updatePost(1L, updatePostDTO));
+
         verify(postRepository).findById(anyLong());
+        verifyNoInteractions(audioService);
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void updatePost_titleEmpty_throwsException() {
+        UpdatePostDTO updatePostDTO = new UpdatePostDTO("", null, null);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.updatePost(1L, updatePostDTO));
+
+        verifyNoInteractions(audioService);
+        verify(postRepository, never()).save(any(Post.class));
+    }
+
+    @Test
+    void updatePost_titleBlank_throwsException() {
+        UpdatePostDTO updatePostDTO = new UpdatePostDTO("       ", null, null);
+
+        when(postRepository.findById(1L)).thenReturn(Optional.of(testPost));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> postService.updatePost(1L, updatePostDTO));
+
+        verifyNoInteractions(audioService);
         verify(postRepository, never()).save(any(Post.class));
     }
 }

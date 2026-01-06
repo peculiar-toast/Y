@@ -1,0 +1,59 @@
+{
+    "properties": [
+        {
+            "name": "spring.ouput.ansi.enabled",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.ouput.ansi.enabled'"
+        },
+        {
+            "name": "jwt.expiration",
+            "type": "java.lang.String",
+            "description": "A description for 'jwt.expiration'"
+        },
+        {
+            "name": "jwt.secret-key",
+            "type": "java.lang.String",
+            "description": "A description for 'jwt.secret-key'"
+        },
+        {
+            "name": "spring.jpa.servlet.multipart.enabled",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.jpa.servlet.multipart.enabled'"
+        },
+        {
+            "name": "spring.jpa.servlet.multipart.max-file-size",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.jpa.servlet.multipart.max-file-size'"
+        },
+        {
+            "name": "spring.jpa.servlet.multipart.max-request-size",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.jpa.servlet.multipart.max-request-size'"
+        },
+        {
+            "name": "spring.logging.level.root",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.logging.level.root'"
+        },
+        {
+            "name": "spring.logging.level.org.springframework",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.logging.level.org.springframework'"
+        },
+        {
+            "name": "spring.logging.level.org.hibernate.validator",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.logging.level.org.hibernate.validator'"
+        },
+        {
+            "name": "spring.logging.level.io.jsonwebtoken",
+            "type": "java.lang.String",
+            "description": "A description for 'spring.logging.level.io.jsonwebtoken'"
+        },
+        {
+            "name": "file-storage.audio",
+            "type": "java.lang.String",
+            "description": "A description for 'file-storage.audio'"
+        }
+    ]
+}

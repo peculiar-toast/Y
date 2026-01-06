@@ -4,14 +4,11 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
-public record UpdatePostDTO (
-
-        @NotBlank(message = "Title cannot be blank")
-        String title,
-
-        @NotNull List<@NotNull MultipartFile> newAudios,
-        @NotNull List<@NotNull Long> removeAudioIds) {
+public record UpdatePostDTO(
+        @Pattern(regexp = ".*\\S.*", message = "Title cannot be blank") String title,
+        List<@NotNull MultipartFile> newAudios,
+        List<@NotNull Long> removeAudioIds) {
 }
