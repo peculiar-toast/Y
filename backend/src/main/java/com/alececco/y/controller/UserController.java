@@ -21,8 +21,8 @@ public class UserController {
     @GetMapping
     public List<UserDTO> getAll() {
         return userService.getAll().stream()
-            .map(user -> modelMapper.map(user, UserDTO.class))
-            .toList();
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .toList();
     }
-    
+
 }

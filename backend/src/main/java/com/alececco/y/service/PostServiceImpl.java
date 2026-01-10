@@ -1,6 +1,7 @@
 package com.alececco.y.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -117,17 +118,29 @@ public class PostServiceImpl implements PostService {
      */
 
     private void validateTitle(String title) {
-        if (title.isBlank())
+        if (title == null) {
+            throw new IllegalArgumentException("Title cannot be null");
+        }
+        if (title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be blank");
+        }
     }
 
     private void validateAudioFiles(List<MultipartFile> files) {
-        if (files == null || files.contains(null))
+        if (files == null) {
             throw new IllegalArgumentException("Files cannot be null");
+        }
+        if (files.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Files cannot contain null elements");
+        }
     }
 
     private void validateDeleteIds(List<Long> ids) {
-        if (ids.contains(null))
+        if (ids == null) {
             throw new IllegalArgumentException("Deleted ids cannot be null");
+        }
+        if (ids.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Deleted ids cannot contain null");
+        }
     }
 }

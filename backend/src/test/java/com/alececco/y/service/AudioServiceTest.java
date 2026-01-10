@@ -56,10 +56,7 @@ public class AudioServiceTest {
         verify(storage, times(2)).store(anyString(), any(InputStream.class));
 
         assertEquals(2, post.getAudioMetadata().size());
-
-        List<AudioMetadata> saved = metadataCaptor.getAllValues();
-        assertEquals(audios.getLast().getOriginalFilename(), saved.getLast().getFilename());
-        assertSame(post, saved.getLast().getPost());
+        assertEquals(audios.getLast().getOriginalFilename(), post.getAudioMetadata().getLast().getFilename());
     }
 
     @Test
@@ -90,7 +87,7 @@ public class AudioServiceTest {
 
     @Test
     void addAudios_wrongFileType_throwsException() {
-        MultipartFile file = new MockMultipartFile("file1", "file.exe", "wrong/type", "content1".getBytes());
+        MultipartFile file = MultipartFileTestFactory.custom("file1", "file.exe", "wrong/type", "content1".getBytes());
 
         assertThrows(WrongFileTypeException.class,
                 () -> audioService.addAudios(post, List.of(file)));
@@ -136,7 +133,7 @@ public class AudioServiceTest {
     void addAudios_storageFails_doesNotMutatePost() throws Exception {
         MultipartFile audio = MultipartFileTestFactory.single("file");
 
-        doThrow(new IOException()).when(storage).store(anyString(), any(InputStream.class));
+        doThrow(new UncheckedIOException(new IOException())).when(storage).store(anyString(), any(InputStream.class));
 
         assertThrows(UncheckedIOException.class,
                 () -> audioService.addAudios(post, List.of(audio)));

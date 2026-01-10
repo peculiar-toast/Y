@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,19 +15,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alececco.y.components.PostMapper;
 import com.alececco.y.dto.post.CreatePostDTO;
 import com.alececco.y.dto.post.PostDTO;
 import com.alececco.y.dto.post.UpdatePostDTO;
-import com.alececco.y.models.AudioMetadata;
 import com.alececco.y.models.Post;
-import com.alececco.y.models.UserRole;
 import com.alececco.y.models.Users;
 import com.alececco.y.repository.PostRepository;
 import com.alececco.y.repository.UserRepository;
+import com.alececco.y.testfactory.CreatePostDtoTestFactory;
 import com.alececco.y.testfactory.MultipartFileTestFactory;
 import com.alececco.y.testfactory.PostTestFactory;
 import com.alececco.y.testfactory.UserTestFactory;
@@ -116,9 +113,9 @@ public class PostServiceImplTest {
 
     @Test
     void createPost_userDoesNotExist_throwsException() {
-        CreatePostDTO createPostDTO = new CreatePostDTO("New Post", List.of(), 1L);
+        CreatePostDTO createPostDTO = CreatePostDtoTestFactory.valid();
 
-        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> {
             postService.createPost(createPostDTO);
@@ -133,12 +130,13 @@ public class PostServiceImplTest {
         UpdatePostDTO updatePostDTO = new UpdatePostDTO("Updated title", null, null);
 
         when(postRepository.findById(anyLong())).thenReturn(Optional.of(testPost));
+        when(postMapper.toDto(any(Post.class))).thenReturn(Instancio.create(PostDTO.class));
 
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
 
-        postService.updatePost(testPost.getId(), updatePostDTO);
+        postService.updatePost(1L, updatePostDTO);
 
-        verify(postRepository).findById(testPost.getId());
+        verify(postRepository).findById(1L);
         verify(postRepository).save(postCaptor.capture());
         verifyNoInteractions(audioService);
 

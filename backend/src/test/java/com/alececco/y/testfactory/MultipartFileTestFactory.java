@@ -1,7 +1,6 @@
 package com.alececco.y.testfactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -22,7 +21,7 @@ public final class MultipartFileTestFactory {
     }
 
     public static List<MultipartFile> multiple(int count) {
-        return IntStream.range(0, count + 1)
+        return IntStream.range(0, count)
                 .mapToObj(i -> single("file" + i))
                 .toList();
     }
