@@ -38,4 +38,4 @@ jwt:
   secret-key: ${JWT_SECRET_KEY}
   expiration: 3600000
 file-storage:
-  audio: ${FILE_PATH}
+  audio: ${FILE_UPLOAD_DIR}
