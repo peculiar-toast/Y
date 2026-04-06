@@ -1,6 +1,6 @@
 import type { JSX } from "react";
 import type { PostData } from "../types/postData";
-import { Post } from "../components/layout/Post";
+import { Post } from "../components/post/Post";
 
 export function HomePage({ posts }: { posts: PostData[] }): JSX.Element {
 
