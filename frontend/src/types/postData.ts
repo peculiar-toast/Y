@@ -1,15 +1,10 @@
-import type { AudioCommentData } from "./audioCommentData";
-import type { AudioMessageData } from "./audioMessageData";
-import type { TagData } from "./tagData";
-import type { UserData } from "./userData";
+type CreatePostDto = {
+  title: string;
+  content: string;
+};
 
-export interface PostData {
-    id: string;
-    title: string;
-    createdAt: Date;
-    likes: number;
-    user: UserData;
-    content: AudioMessageData;
-    comments: AudioCommentData[];
-    tags: TagData[];
-}
+type Post = {
+  id: number;
+} & CreatePostDto;
+
+export type { CreatePostDto, Post };
