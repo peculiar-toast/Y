@@ -1,6 +1,6 @@
 type FetchMethodTypes = "GET" | "POST" | "DELETE" | "PUT";
 
-const BASE_URL = "http://localhost:8080/api";
+const BASE_URL = "http://192.168.1.100:8080/api";
 
 async function apiCall(
   url: string,
