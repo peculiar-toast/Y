@@ -1,28 +1,30 @@
 type FetchMethodTypes = "GET" | "POST" | "DELETE" | "PUT";
 
-const BASE_URL = "http://192.168.1.100:8080/api";
+const BASE_URL = "http://localhost:8000/api";
 
 async function apiCall(
   url: string,
   method: FetchMethodTypes = "GET",
-  data = {},
-  headers = {},
+  data: Record<string, unknown> | FormData = {},
+  headers: Record<string, string> = {},
 ) {
+  const isFormData = data instanceof FormData;
+
   const options: RequestInit = {
     method,
     headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...headers,
     },
   };
 
   if (method !== "GET") {
-    options.body = JSON.stringify(data);
-  } else if (Object.keys(data).length > 0) {
+    options.body = isFormData ? data : JSON.stringify(data);
+  } else if (!isFormData && Object.keys(data).length > 0) {
     const queryParams = new URLSearchParams(
       data as Record<string, string>,
     ).toString();
+
     url += `?${queryParams}`;
   }
 
@@ -31,6 +33,10 @@ async function apiCall(
 
     if (!response.ok) {
       throw new Error(`API call failed with status ${response.status}`);
+    }
+
+    if (response.status === 201) {
+      return response.headers.get("Location");
     }
 
     // if empty response

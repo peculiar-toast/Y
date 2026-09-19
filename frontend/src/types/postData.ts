@@ -5,6 +5,7 @@ type CreatePostDto = {
 
 type Post = {
   id: number;
+  audio: string;
 } & CreatePostDto;
 
 export type { CreatePostDto, Post };
