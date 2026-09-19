@@ -10,18 +10,29 @@ export function PostElement({
   post,
   handleDeletePost,
 }: PostElementProps): JSX.Element {
+  let audioEl = <p>Could not load audio</p>;
+
+  if (post.id) {
+    audioEl = (
+      <audio
+        src={`http://localhost:8000/api/audio/${post.id}/data`}
+        controls
+      ></audio>
+    );
+  }
+
   return (
     <div className="container post">
       <div className="row">
-        <span className="col widget post-title">{post.title}</span>
-        <span className="col widget post-date">{post.content}</span>
+        <span className="col widget title">{post.title ?? "No title"}</span>
+
+        <span className="col widget">{post.content}</span>
+
+        <div className="row">{audioEl}</div>
       </div>
 
-      <div className="row">
+      <div className="row widget">
         <button className="col-1">like</button>
-      </div>
-
-      <div className="row">
         <button className="col-1" onClick={handleDeletePost}>
           delete
         </button>

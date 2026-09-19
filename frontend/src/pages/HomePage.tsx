@@ -1,12 +1,11 @@
 import { useEffect, useState, type JSX } from "react";
 import { PostElement } from "../components/post/Post";
-import type { CreatePostDto, Post } from "../types/postData";
-import { deletePost, getAllPosts, savePost } from "../api/post";
+import type { Post } from "../types/postData";
+import { deletePost, getAllPosts } from "../api/post";
+import { CreatePostForm } from "../components/CreatePostForm";
 
 export function HomePage(): JSX.Element {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
 
   useEffect(() => {
     getAllPosts()
@@ -18,46 +17,15 @@ export function HomePage(): JSX.Element {
       });
   }, []);
 
-  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const newPost: CreatePostDto = { title, content };
-    const post = await savePost(newPost);
-
-    if (post !== undefined) {
-      setPosts([...posts, post]);
-    }
-  }
-
   return (
     <div>
       <h1>Home Page</h1>
 
-      <form className="container" method="POST" onSubmit={handleSubmit}>
-        <label className="row">
-          <span className="col">Title:</span>
-          <input
-            className="col"
-            name="title"
-            placeholder="Title..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
-        </label>
-
-        <label className="row">
-          <span className="col">Content:</span>
-          <input
-            className="col"
-            placeholder="Content..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-        </label>
-
-        <input type="submit" value={"Post!"} />
-      </form>
+      <CreatePostForm
+        addPost={(p: Post) => {
+          setPosts([...posts, p]);
+        }}
+      />
 
       {posts.length === 0 ? (
         <p>No posts yet!</p>
