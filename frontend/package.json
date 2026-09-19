@@ -5,9 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev-all": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "format": "prettier --write .",
+    "lint": "eslint . --fix --cache",
+    "preview": "vite preview",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "bootstrap": "^5.3.8",
@@ -23,9 +27,22 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
+    "oxlint": "^1.58.0",
+    "prettier": "^3.8.1",
     "sass": "^1.92.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vitest": "^4.1.2",
+    "storybook": "^10.3.5",
+    "@storybook/react-vite": "^10.3.5",
+    "@chromatic-com/storybook": "^5.1.2",
+    "@storybook/addon-vitest": "^10.3.5",
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "eslint-plugin-storybook": "^10.3.5",
+    "playwright": "^1.59.1",
+    "@vitest/browser-playwright": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.2"
   }
 }
