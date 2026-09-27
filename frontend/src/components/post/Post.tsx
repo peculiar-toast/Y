@@ -1,6 +1,9 @@
 import type { JSX } from "react";
 import type { Post } from "../../types/postData";
 
+import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import AudioPlayer from "../AudioPlayer";
+
 type PostElementProps = {
   post: Post;
   handleDeletePost: () => void;
@@ -12,31 +15,24 @@ export function PostElement({
 }: PostElementProps): JSX.Element {
   let audioEl = <p>Could not load audio</p>;
 
-  if (post.id) {
-    audioEl = (
-      <audio
-        src={`http://localhost:8000/api/audio/${post.id}/data`}
-        controls
-      ></audio>
-    );
-  }
+  audioEl = <AudioPlayer src={post.audio} />;
 
   return (
-    <div className="container post">
-      <div className="row">
-        <span className="col widget title">{post.title ?? "No title"}</span>
+    <Card variant="outlined">
+      <CardContent>
+        <Typography>{post.title ?? "No title"}</Typography>
 
-        <span className="col widget">{post.content}</span>
+        <Typography>{post.content}</Typography>
 
-        <div className="row">{audioEl}</div>
-      </div>
+        <Box>{audioEl}</Box>
+      </CardContent>
 
-      <div className="row widget">
-        <button className="col-1">like</button>
-        <button className="col-1" onClick={handleDeletePost}>
+      <CardContent>
+        <Button variant="contained">like</Button>
+        <Button variant="outlined" onClick={handleDeletePost}>
           delete
-        </button>
-      </div>
-    </div>
+        </Button>
+      </CardContent>
+    </Card>
   );
 }

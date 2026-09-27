@@ -25,7 +25,10 @@ SECRET_KEY = "django-insecure-f-f$%-f0!)l3ddvj#^j91m)_(6(l&i%hhtdm&nq=pkh^2p+4so
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "toast.lol",
+    "192.168.1.100",
+]
 
 
 # Application definition
@@ -136,10 +139,16 @@ REST_FRAMEWORK = {
     ]
 }
 
+
+
 CORS_ALLOWED_ORIGINS = [
+    "http://toast.lol:5173",
+    "http://192.168.1.100:5173",
+    "http://127.0.0.1:5173",
     "http://localhost:5173",
 ]
 
-MEDIA_ROOT = "./media"
+MEDIA_URL = "http://192.168.1.100:8080/media/"
+MEDIA_ROOT = "../media/"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10 MB

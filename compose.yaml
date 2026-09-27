@@ -1,0 +1,8 @@
+services:
+  web:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./media/:/srv/y/media:ro
+    ports:
+     - "8080:80"

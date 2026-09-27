@@ -1,66 +1,89 @@
 import { useState } from "react";
 import type { Post } from "../types/postData";
 import { saveAudio, savePost } from "../api/post";
-import { AudioRecorder, type NotSentAudio } from "./AudioRecorder";
+import { AudioRecorder } from "./AudioRecorder";
+import { Box, Button, FormGroup, Stack, TextField, Typography } from "@mui/material";
 
 type CreatePostFormProps = {
-  addPost: (post: Post) => void;
+  onSubmit: (post: Post) => void;
 };
 
-export function CreatePostForm({ addPost }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit: addPost }: CreatePostFormProps) {
   const [title, setTitle] = useState<string>("");
   const [content, setContent] = useState<string>("");
-  const [audio, setAudio] = useState<NotSentAudio | null>(null);
+  const [audio, setAudio] = useState<Blob | null>(null);
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleAudioCreated(newAudio: NotSentAudio) {
+  function handleAudioCreated(newAudio: Blob) {
     setAudio(newAudio);
   }
 
-  // TODO reset form fields
+  function handleReset () {
+    setTitle("")
+    setContent("")
+    setAudio(null)
+  }
+
   async function handleCreatePost(ev: React.SubmitEvent<HTMLFormElement>) {
     ev.preventDefault();
 
-    if (audio) {
-      await saveAudio(1, audio.blob);
-    }
+    if (submitting) return
 
-    const post = await savePost({ title, content });
+    try {
+      setSubmitting(true)
 
-    if (post !== undefined) {
-      addPost(post);
+      if (audio) {
+        await saveAudio(1, audio);
+      }
+
+      const post = await savePost({ title, content });
+      
+      if (post) {
+        addPost(post);
+      }
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
-    <div className="container">
-      <form onSubmit={async (ev) => handleCreatePost(ev)}>
-        <label className="row">
-          <span className="col">Title:</span>
-          <input
-            className="col"
+    <Box
+      component="form"
+      onSubmit={handleCreatePost}
+      onReset={handleReset}
+    >
+      <Stack spacing={2}>
+          <TextField
             name="title"
             placeholder="Title..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            fullWidth
           />
-        </label>
 
-        <label className="row">
-          <span className="col">Content:</span>
-          <input
-            className="col"
-            placeholder="Content..."
+          <TextField
+            name="content"
+            label="Content"
+            placeholder="What's on your mind?"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            multiline
+            minRows={3}
+            fullWidth
           />
-        </label>
 
-        <AudioRecorder handleAudioCreated={handleAudioCreated} />
+        <AudioRecorder onRecorded={handleAudioCreated} />
 
-        <input type="submit" value={"Create post!"} />
-        <input type="reset" value={"Reset"} />
-      </form>
-    </div>
+        <Stack direction="row" spacing={1}>
+          <Button type="submit" variant="contained" disabled={submitting}>
+            {submitting ? "Creating..." : "Create post"}
+          </Button>
+          <Button type="reset" variant="outlined" disabled={submitting}>
+            Reset
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

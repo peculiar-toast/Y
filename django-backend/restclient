@@ -1,0 +1,8 @@
+# Profiles
+## Get all profiles
+GET http://localhost:8000/api/profiles
+
+
+# Posts
+## Get all posts
+GET http://localhost:8000/api/posts

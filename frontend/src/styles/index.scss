@@ -11,6 +11,10 @@ body {
   color: var(--text-color);
 }
 
+.feed {
+  max-width: 1140px;
+}
+
 .post {
   background-color: var(--post-bg-color);
   margin-bottom: 10px;
