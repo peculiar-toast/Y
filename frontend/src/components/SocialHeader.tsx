@@ -1,6 +1,7 @@
-import { AppBar, Stack, styled, Toolbar, Typography, useTheme } from "@mui/material";
+import { AppBar, Button, Stack, styled, Toolbar, Typography, useTheme } from "@mui/material";
 import type { ReactNode } from "react";
 import { Link } from 'react-router';
+import { useAuth } from "../auth/AuthProvider";
 
 const LogoContainer = styled('div')({
   position: 'relative',
@@ -19,6 +20,8 @@ export interface SocialHeaderProps {
 
 export default function SocialHeader({ logo, title }: SocialHeaderProps) {
     const theme = useTheme();
+
+    const { user, logout } = useAuth();
 
     return (
         <AppBar color="inherit" position="absolute" sx={{ displayPrint: 'none'}}>
@@ -55,34 +58,67 @@ export default function SocialHeader({ logo, title }: SocialHeaderProps) {
                     </Stack>
 
                     <Stack direction={"row"} sx={{ alignItems: 'center'}}>
-                        <Link to="/user/sign-up" style={{ textDecoration: 'none' }}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    color: (theme.vars ?? theme).palette.primary.main,
-                                    fontWeight: '700',
-                                    ml: 1,
-                                    whiteSpace: 'nowrap',
-                                    lineHeight: 1,
-                                }}
-                            >
-                                Sign Up
-                            </Typography>
-                        </Link>
-                        <Link to="/user/sign-in" style={{ textDecoration: 'none' }}>
-                            <Typography
-                                variant="h6"
-                                sx={{
-                                    color: (theme.vars ?? theme).palette.primary.main,
-                                    fontWeight: '700',
-                                    ml: 1,
-                                    whiteSpace: 'nowrap',
-                                    lineHeight: 1,
-                                }}
-                            >
-                                Sign In
-                            </Typography>
-                        </Link>
+                        {user ? (
+                            <>
+                                <Typography
+                                    variant="h6"
+                                    sx={{
+                                        color: (theme.vars ?? theme).palette.primary.main,
+                                        fontWeight: '700',
+                                        ml: 1,
+                                        whiteSpace: 'nowrap',
+                                        lineHeight: 1,
+                                    }}
+                                >
+                                    {user.username}
+                                </Typography>
+                                <Button onClick={logout}>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            color: (theme.vars ?? theme).palette.primary.main,
+                                            fontWeight: '700',
+                                            ml: 1,
+                                            whiteSpace: 'nowrap',
+                                            lineHeight: 1,
+                                        }}
+                                    >
+                                        Log Out
+                                    </Typography>
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Link to="/user/sign-up" style={{ textDecoration: 'none' }}>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            color: (theme.vars ?? theme).palette.primary.main,
+                                            fontWeight: '700',
+                                            ml: 1,
+                                            whiteSpace: 'nowrap',
+                                            lineHeight: 1,
+                                        }}
+                                    >
+                                        Sign Up
+                                    </Typography>
+                                </Link>
+                                <Link to="/user/sign-in" style={{ textDecoration: 'none' }}>
+                                    <Typography
+                                        variant="h6"
+                                        sx={{
+                                            color: (theme.vars ?? theme).palette.primary.main,
+                                            fontWeight: '700',
+                                            ml: 1,
+                                            whiteSpace: 'nowrap',
+                                            lineHeight: 1,
+                                        }}
+                                    >
+                                        Sign In
+                                    </Typography>
+                                </Link>
+                            </>
+                        )}
                     </Stack>
                 </Stack>
             </Toolbar>

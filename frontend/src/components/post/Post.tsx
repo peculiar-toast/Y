@@ -1,38 +1,50 @@
 import type { JSX } from "react";
 import type { Post } from "../../types/postData";
 
-import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, CardActions, CardContent, Typography } from "@mui/material";
 import AudioPlayer from "../AudioPlayer";
 
 type PostElementProps = {
   post: Post;
+  handleLikePost: () => void;
   handleDeletePost: () => void;
 };
 
 export function PostElement({
   post,
+  handleLikePost,
   handleDeletePost,
 }: PostElementProps): JSX.Element {
-  let audioEl = <p>Could not load audio</p>;
-
-  audioEl = <AudioPlayer src={post.audio} />;
-
   return (
-    <Card variant="outlined">
+    <Card variant="elevation">
       <CardContent>
-        <Typography>{post.title ?? "No title"}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+          <Avatar
+            src={post.user.avatar}
+            alt={post.user.username}
+            sx={{width: 40, height: 40}}
+          >
+            {post.user.username.charAt(0).toUpperCase()}
+          </Avatar>
 
-        <Typography>{post.content}</Typography>
+          <Typography variant="subtitle2" sx={{fontWeight: 600}}>
+            {post.user.username}
+          </Typography>
+        </Box>
+      
+        <Typography variant="h6">{post.title || "No title"}</Typography>
 
-        <Box>{audioEl}</Box>
+        <Box sx={{mt: 2}}>
+          <AudioPlayer src={post.audio} />
+        </Box>
       </CardContent>
 
-      <CardContent>
-        <Button variant="contained">like</Button>
+      <CardActions>
+        <Button variant="contained" onClick={handleLikePost}>like</Button>
         <Button variant="outlined" onClick={handleDeletePost}>
           delete
         </Button>
-      </CardContent>
+      </CardActions>
     </Card>
   );
 }

@@ -1,20 +1,36 @@
 import { Box, Stack, TextField, Button } from "@mui/material";
 import { useState } from "react";
 import PageContainer from "../components/PageContainer";
+import { createUser } from "../api/user";
 
 export default function UserCreationPage() {
-    const [username, setUsername] = useState<string | null>(null)
-    const [email, setEmail] = useState<string | null>(null)
-    const [password, setPassword] = useState<string | null>(null)
+    const [username, setUsername] = useState("")
+    const [email, setEmail] = useState("")
+    const [password, setPassword] = useState("")
 
     const [submitting, setSubmitting] = useState(false)
     
-    async function handleCreateUser() {
-        throw "TODO not implemented"
+    async function handleCreateUser(
+        event : React.FormEvent<HTMLFormElement>
+    ) {
+        event.preventDefault();
+        setSubmitting(true)
+        
+        try {
+            await createUser({ username, email, password })
+
+            // TODO login / redirect
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     function handleReset() {
-        throw "TODO not implemented"
+        setUsername("")
+        setEmail("")
+        setPassword("")
     }
 
     const pageTitle = "Sign Up"
@@ -32,8 +48,9 @@ export default function UserCreationPage() {
                 <Stack spacing={2}>
                     <TextField
                         name="username"
+                        label="Username"
                         placeholder="Username..."
-                        value={username ? username : ""}
+                        value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
                         fullWidth
@@ -41,8 +58,10 @@ export default function UserCreationPage() {
 
                     <TextField
                         name="email"
-                        placeholder="Email..."
-                        value={email ? email : ""}
+                        label="Email"
+                        placeholder="myemail@example.com"
+                        type="email"
+                        value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                         fullWidth
@@ -52,7 +71,8 @@ export default function UserCreationPage() {
                         name="password"
                         label="Password"
                         placeholder="What's on your mind?"
-                        value={password ? password : ""}
+                        type="password"
+                        value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         fullWidth
                         required

@@ -60,10 +60,6 @@ class Command(BaseCommand):
                     password="password",
                 )
                 
-                Profile.objects.create(
-                    user=user,
-                )
-                
                 for _ in range(random.randint(0, 5)):
                     file = random.choice(audio_files)
                     

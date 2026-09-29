@@ -181,11 +181,20 @@ export function AudioRecorder({
       return
     }
 
-    if (
-      !navigator.mediaDevices?.getUserMedia ||
-      typeof MediaRecorder === 'undefined'
-    ) {
-      setError('Microphone is not supported by this browser.')
+    if (!window.isSecureContext) {
+      setError('Microphone access requires a secure context (HTTPS).')
+      setStatus("error")
+      return
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setError('This browser does not support microphone access.')
+      setStatus("error")
+      return
+    }
+
+    if (typeof MediaRecorder === 'undefined') {
+      setError('This browser does not support audio recording.')
       setStatus("error")
       return
     }
@@ -293,7 +302,7 @@ export function AudioRecorder({
     if (!recorder || recorder.state !== 'recording') return
 
     recorder.pause()
-    pausedAtRef.current = Date.now()
+    pausedAtRef.current = performance.now()
 
     stopTimer()
     setStatus('paused')

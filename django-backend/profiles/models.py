@@ -7,7 +7,13 @@ class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
-        primary_key=True
+        related_name="profile"
+    )
+
+    avatar = models.ImageField(
+        upload_to="avatars/",
+        null=True,
+        blank=True
     )
 
     date_created = models.DateTimeField(auto_now_add=True)
@@ -17,7 +23,7 @@ class Profile(models.Model):
 
     def get_absolute_url(self):
         return reverse("Profile_detail", kwargs={"pk": self.pk})
-    
+
 class Post(models.Model):
 
     user = models.ForeignKey(

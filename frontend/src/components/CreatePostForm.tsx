@@ -1,16 +1,18 @@
 import { useState } from "react";
 import type { Post } from "../types/postData";
-import { saveAudio, savePost } from "../api/post";
+import { savePost } from "../api/post";
 import { AudioRecorder } from "./AudioRecorder";
-import { Box, Button, FormGroup, Stack, TextField, Typography } from "@mui/material";
+import { Box, Button, FormControl, FormLabel, Stack, TextField } from "@mui/material";
+import { useNavigate } from "react-router";
 
 type CreatePostFormProps = {
   onSubmit: (post: Post) => void;
 };
 
-export function CreatePostForm({ onSubmit: addPost }: CreatePostFormProps) {
+export function CreatePostForm({ onSubmit }: CreatePostFormProps) {
+    const navigate = useNavigate();
+
   const [title, setTitle] = useState<string>("");
-  const [content, setContent] = useState<string>("");
   const [audio, setAudio] = useState<Blob | null>(null);
   const [submitting, setSubmitting] = useState(false)
 
@@ -18,9 +20,8 @@ export function CreatePostForm({ onSubmit: addPost }: CreatePostFormProps) {
     setAudio(newAudio);
   }
 
-  function handleReset () {
+  function handleReset() {
     setTitle("")
-    setContent("")
     setAudio(null)
   }
 
@@ -28,19 +29,18 @@ export function CreatePostForm({ onSubmit: addPost }: CreatePostFormProps) {
     ev.preventDefault();
 
     if (submitting) return
+    if (!audio) return
 
     try {
       setSubmitting(true)
 
-      if (audio) {
-        await saveAudio(1, audio);
+      const post = await savePost({ title, audio });
+
+      if (post) {
+        onSubmit(post);
       }
 
-      const post = await savePost({ title, content });
-      
-      if (post) {
-        addPost(post);
-      }
+      navigate("/");
     } finally {
       setSubmitting(false)
     }
@@ -53,27 +53,21 @@ export function CreatePostForm({ onSubmit: addPost }: CreatePostFormProps) {
       onReset={handleReset}
     >
       <Stack spacing={2}>
-          <TextField
-            name="title"
-            placeholder="Title..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            fullWidth
-          />
+        <TextField
+          name="title"
+          placeholder="Title..."
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          fullWidth
+        />
 
-          <TextField
-            name="content"
-            label="Content"
-            placeholder="What's on your mind?"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            multiline
-            minRows={3}
-            fullWidth
-          />
-
-        <AudioRecorder onRecorded={handleAudioCreated} />
+        <FormControl component="fieldset">
+          <FormLabel component="legend">
+            Record Audio
+          </FormLabel>
+          <AudioRecorder onRecorded={handleAudioCreated} />
+        </FormControl>
 
         <Stack direction="row" spacing={1}>
           <Button type="submit" variant="contained" disabled={submitting}>
